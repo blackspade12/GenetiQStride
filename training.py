@@ -61,6 +61,11 @@ print(f"Injury Risk Model Accuracy: {injury_accuracy:.2f}")
 X_breeding_train = np.expand_dims(X_train_scaled, axis=-1)
 X_breeding_test = np.expand_dims(X_test_scaled, axis=-1)
 
+# Normalize Breeding Score to range 0-1 for training
+y_breeding_train_scaled = y_breeding_train / 100.0
+y_breeding_test_scaled = y_breeding_test / 100.0
+
+
 cnn_model = keras.Sequential([
     keras.layers.Conv1D(filters=64, kernel_size=3, activation='relu', input_shape=(X_breeding_train.shape[1], 1)),
     keras.layers.MaxPooling1D(pool_size=2),
@@ -68,11 +73,11 @@ cnn_model = keras.Sequential([
     keras.layers.MaxPooling1D(pool_size=2),
     keras.layers.Flatten(),
     keras.layers.Dense(256, activation='relu'),
-    keras.layers.Dense(1, activation='linear')
+    keras.layers.Dense(1, activation='sigmoid')  # ✅ Use sigmoid to constrain output between 0 and 1
 ])
 
 cnn_model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae'])
-cnn_model.fit(X_breeding_train, y_breeding_train, epochs=20, batch_size=64, validation_data=(X_breeding_test, y_breeding_test))
+cnn_model.fit(X_breeding_train, y_breeding_train_scaled, epochs=20, batch_size=64, validation_data=(X_breeding_test, y_breeding_test_scaled))
 cnn_accuracy = cnn_model.evaluate(X_breeding_test, y_breeding_test, verbose=0)[1]
 print(f"Breeding Recommendation Model MAE: {cnn_accuracy:.2f}")
 
