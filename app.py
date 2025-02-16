@@ -3,6 +3,10 @@ import numpy as np
 import tensorflow as tf
 import joblib
 from pydantic import BaseModel
+import matplotlib.pyplot as plt
+from fastapi.responses import FileResponse
+import os
+
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -13,6 +17,10 @@ injury_risk_model = joblib.load("injury_model.pkl")
 breeding_score_model = tf.keras.models.load_model("breeding_cnn_model.keras")
 scaler = joblib.load("scaler.pkl")
 label_encoders = joblib.load("label_encoders.pkl")
+# Load PCA model
+pca = joblib.load("pca_model.pkl")
+X_train_scaled = joblib.load("X_train_scaled.pkl")  # Load saved scaled data
+
 
 # Define request model
 class HorseFeatures(BaseModel):
@@ -88,6 +96,28 @@ def predict_breeding_score(features: HorseFeatures):
 
     return {"Breeding_Score": round(float(prediction), 2)}
 
+@app.get("/visualize_pca")
+def visualize_pca():
+    try:
+        # Apply PCA transformation
+        X_pca = pca.transform(X_train_scaled)
+
+        plt.figure(figsize=(8, 6))
+        plt.scatter(X_pca[:, 0], X_pca[:, 1], alpha=0.5, c='blue', edgecolors='k')
+        plt.xlabel("PC1(Champion Genetic Index)")
+        plt.ylabel("PC2(Performance & Injury Risk Index)")
+        plt.title("Genetic Data PCA Visualization")
+        plt.grid(True)
+
+        # Save the plot
+        plot_path = "pca_plot.png"
+        plt.savefig(plot_path)
+        plt.close()
+
+        return FileResponse(plot_path, media_type="image/png")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating PCA plot: {str(e)}")
 
 # Run the API with uvicorn
 if __name__ == "__main__":
