@@ -6,4 +6,5 @@ scikit-learn
 joblib
 tensorflow
 pydantic
+matplotlib
 h5py
