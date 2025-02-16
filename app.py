@@ -90,11 +90,10 @@ def predict_injury_risk(features: HorseFeatures):
 def predict_breeding_score(features: HorseFeatures):
     input_data = preprocess_input(features)
     prediction = breeding_score_model.predict(np.expand_dims(input_data, axis=-1))[0][0]
-
-    # **Ensure score is within 0-100 range**
-    prediction = max(0, min(100, prediction))  
-
+    prediction = prediction * 100  # ✅ Convert back to 0-100 range
+    prediction = max(0, min(100, prediction))  # ✅ Ensure it's within 0-100
     return {"Breeding_Score": round(float(prediction), 2)}
+
 
 @app.get("/visualize_pca")
 def visualize_pca():
