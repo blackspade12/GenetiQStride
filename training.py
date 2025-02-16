@@ -80,5 +80,12 @@ print(f"Breeding Recommendation Model MAE: {cnn_accuracy:.2f}")
 joblib.dump(race_model, "race_model.pkl")
 joblib.dump(injury_model, "injury_model.pkl")
 cnn_model.save("breeding_cnn_model.keras")  # ✅ Uses recommended Keras format
+joblib.dump(X_train_scaled, "X_train_scaled.pkl")
+
 
 print("✅ Models trained and saved successfully!")
+# Check feature contributions to PC1 & PC2
+pca_components = pd.DataFrame(pca.components_, columns=X.columns, index=['PC1', 'PC2'])
+print("PCA Component Contributions:")
+print(pca_components.T.sort_values(by="PC1", ascending=False))  # Shows top PC1 features
+print(pca_components.T.sort_values(by="PC2", ascending=False))  # Shows top PC2 features
